@@ -9,8 +9,8 @@ import os
 from imutils.video import FPS
 
 #set source and destination paths
-SOURCE_PATH = '/home/usafa/usafa_472/rover_lab_01/data'
-DEST_PATH = '/home/usafa/usafa_472/rover_lab_01/data_processed'
+SOURCE_PATH = '/media/usafa/data/rover_data'
+DEST_PATH = '/media/usafa/data/rover_data_processed'
 #define the range of white you want
 white_L = 220
 white_H = 255
@@ -123,23 +123,31 @@ def process_bag_file(source_file, dest_folder=None, skip_if_exists=True):
                 # Crop Bw image
                 BW_frame = BW_frame[crop_T:crop_B, 0:crop_W]
 
+                # Edge detection attempt
+                edges = cv2.Canny(gray_frame,100,200)
+
                 i += 1
 
                 # show the output frame for sanity check
                 cv2.imshow("gray", gray_frame)
                 cv2.imshow("Black and white", BW_frame)
                 cv2.imshow("Color Processed", color_frame)
+                cv2.imshow("Edge Detection", edges)
 
 
                 # rgb
                 c_frm_name = f"{'{:09d}'.format(frm_num)}_{throttle}_{steering}_{heading}_c.png"
 
                 # BW
-                bw_frm_name = f"{'{:09d}'.format(frm_num)}_{throttle}_{steering}_{heading}_bw.png"
+                bw_frm_name = f"{'{:09d}'.format(frm_num)}_{throttle}_{steering}_{heading}_BW.png"
+
+                # Edge Detection
+                edge_frm_name = f"{'{:09d}'.format(frm_num)}_{throttle}_{steering}_{heading}_edge.png"
 
                 #save both images
                 cv2.imwrite(os.path.join(dest_path, c_frm_name), color_frame)
                 cv2.imwrite(os.path.join(dest_path, bw_frm_name), BW_frame)
+                cv2.imwrite(os.path.join(dest_path, edge_frm_name), edges)
 
                 #keep track of fps
                 fps.update()
@@ -150,6 +158,7 @@ def process_bag_file(source_file, dest_folder=None, skip_if_exists=True):
                 if key == ord("q"):
                     break
             except Exception as e:
+                print("I am here one")
                 print(e)
                 continue
     except Exception as e:
