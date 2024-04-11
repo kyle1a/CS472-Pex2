@@ -11,9 +11,9 @@ import csv
 
 
 # port = "/dev/ttyUSB0" #USB
-DEFAULT_BAUD = 115200  # 57600
-DEFAULT_DATA_PATH = '/media/usafa/data/rover_data/'
-DEFAULT_PORT = "/dev/ttyUSB0"
+DEFAULT_BAUD = 57600 #115200
+DEFAULT_DATA_PATH = "/media/usafa/aux_data/data/counterclockwise/"
+DEFAULT_PORT = "/dev/ttyACM0"
 connection = None
 
 def append_ardu_data(throttle, steering, heading, idx, file):
@@ -41,6 +41,29 @@ def prepare_log_file(log_file):
     #handlers = [logging.FileHandler(log_file), logging.StreamHandler()]
     #logging.basicConfig(level=logging.DEBUG, handlers=handlers)
 
+def set_device_channel_msg(device):
+    @device.on_message('RC_CHANNELS')
+    def RC_CHANNEL_listener(vehicle, name, message):
+        set_rc(vehicle, 1, message.chan1_raw)
+        set_rc(vehicle, 2, message.chan2_raw)
+        set_rc(vehicle, 3, message.chan3_raw)
+        set_rc(vehicle, 4, message.chan4_raw)
+        set_rc(vehicle, 5, message.chan5_raw)
+        set_rc(vehicle, 6, message.chan6_raw)
+        set_rc(vehicle, 7, message.chan7_raw)
+        set_rc(vehicle, 8, message.chan8_raw)
+        set_rc(vehicle, 9, message.chan9_raw)
+        set_rc(vehicle, 10, message.chan10_raw)
+        set_rc(vehicle, 11, message.chan11_raw)
+        set_rc(vehicle, 12, message.chan12_raw)
+        set_rc(vehicle, 13, message.chan13_raw)
+        set_rc(vehicle, 14, message.chan14_raw)
+        set_rc(vehicle, 15, message.chan15_raw)
+        set_rc(vehicle, 16, message.chan16_raw)
+        vehicle.notify_attribute_listeners('channels', vehicle.channels)
+
+def set_rc(vehicle, chnum, v):
+	vehicle._channels._update_channel(str(chnum), v)
 
 def collect_data(bag_file):
     throttle = 0
@@ -160,6 +183,7 @@ if __name__ == "__main__":
     print(f"Connecting to autopilot on port {port} at baud rate {DEFAULT_BAUD}...")
     connection = dl.connect_device(port, DEFAULT_BAUD)
     print("Connection established.")
+    set_device_channel_msg(connection)
     dl.display_vehicle_state(connection)
 
     while True:
